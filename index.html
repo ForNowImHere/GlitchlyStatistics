@@ -2,50 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>⏱ Downtime Monitor</title>
+  <title>📡 one-learning-jaybird Status</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      background: #111;
-      color: #fff;
-      font-family: sans-serif;
-      padding: 2em;
-      max-width: 600px;
-      margin: auto;
-    }
-    h1 { color: #0ff; }
-    .entry.up { color: #0f0; }
-    .entry.down { color: #f00; }
+    body { background: #111; color: white; font-family: sans-serif; padding: 2em; }
+    h1, h2 { color: #0ff; }
+    .up { color: #0f0; }
+    .down { color: #f00; }
+    canvas { background: #222; padding: 1em; border-radius: 1em; }
   </style>
 </head>
 <body>
   <h1>📡 Status for one-learning-jaybird.ngrok-free.app</h1>
-  <p>⏱ Current Status: <span id="live-status">Checking...</span></p>
-  <h2>🕰 Past Downtime</h2>
-  <div id="log"></div>
+  <p>⏱ Current Status: <span id="status">🔍 Checking externally...</span></p>
+
+  <h2>🧩 Subroute Check</h2>
+  <ul id="routes"></ul>
+
+  <h2>📊 Past Downtime</h2>
+  <canvas id="downtimeChart" width="400" height="200"></canvas>
 
   <script>
-    // Fake live check by pinging a known route
-    fetch(window.location.href + '?livecheck=' + Date.now(), { cache: 'no-store' })
-      .then(() => {
-        document.getElementById('live-status').innerText = '✅ UP';
-        document.getElementById('live-status').style.color = '#0f0';
-      })
-      .catch(() => {
-        document.getElementById('live-status').innerText = '❌ DOWN';
-        document.getElementById('live-status').style.color = '#f00';
-      });
+    const domain = "https://one-learning-jaybird.ngrok-free.app";
 
-    // Load downtime log
+    // Static list of routes to check
+    const routesToCheck = ['/', '/domains', '/thingyls', '/beans', '/doesnotexist'];
+
+    const routeList = document.getElementById('routes');
+
+    routesToCheck.forEach(route => {
+      const li = document.createElement('li');
+      li.textContent = `Checking ${route}...`;
+      routeList.appendChild(li);
+
+      fetch(domain + route, { cache: 'no-store', mode: 'no-cors' })
+        .then(() => {
+          li.innerHTML = `✅ <span class="up">${route}</span> is UP`;
+        })
+        .catch(() => {
+          li.innerHTML = `❌ <span class="down">${route}</span> is DOWN`;
+        });
+    });
+
+    // Fetch downtime log
     fetch('downtime-log.json')
       .then(res => res.json())
       .then(data => {
-        const logDiv = document.getElementById('log');
-        data.history.forEach(entry => {
-          const div = document.createElement('div');
-          div.className = 'entry ' + entry.status.toLowerCase();
-          div.textContent = `${entry.time} — ${entry.status}`;
-          logDiv.appendChild(div);
+        const ctx = document.getElementById('downtimeChart').getContext('2d');
+
+        const labels = data.history.map(h => new Date(h.time).toLocaleString());
+        const statuses = data.history.map(h => h.status === 'UP' ? 1 : 0);
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Uptime (1 = UP, 0 = DOWN)',
+              data: statuses,
+              borderColor: '#0ff',
+              backgroundColor: 'rgba(0,255,255,0.2)',
+              tension: 0.2,
+              fill: true
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 0,
+                max: 1,
+                ticks: {
+                  stepSize: 1,
+                  callback: value => value === 1 ? 'UP' : 'DOWN'
+                }
+              }
+            }
+          }
         });
+      });
+
+    // Live status - based on a known external checker
+    fetch('https://api-bot-or-script.com/status.json') // placeholder for real source
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('status').textContent = data.currentStatus === 'UP' ? '✅ UP' : '❌ DOWN';
+        document.getElementById('status').className = data.currentStatus === 'UP' ? 'up' : 'down';
+      })
+      .catch(() => {
+        document.getElementById('status').textContent = '❓ Could not verify';
       });
   </script>
 </body>
