@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📡 Domain Status - one-learning-jaybird</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+    }
+    .status {
+      margin: 1em auto;
+      padding: 1em;
+      border-radius: 8px;
+      background: #222;
+      max-width: 400px;
+      font-size: 1.2em;
+    }
+    .up { color: #0f0; }
+    .down { color: #f00; }
+  </style>
+</head>
+<body>
+  <h1>🌐 Domain Status</h1>
+  <div id="domains"></div>
+
+  <script>
+    const domains = [
+      'https://google.com',
+      'https://openai.com',
+      'https://example.com',
+      'https://notarealdomain.abc' // test fail
+    ];
+
+    const container = document.getElementById('domains');
+
+    domains.forEach(domain => {
+      const el = document.createElement('div');
+      el.className = 'status';
+      el.innerText = `Checking ${domain}...`;
+      container.appendChild(el);
+
+      fetch(domain, { mode: 'no-cors' }) // no-cors avoids blocking
+        .then(() => {
+          el.innerHTML = `✅ <span class="up">${domain}</span> is <strong>UP</strong>`;
+        })
+        .catch(() => {
+          el.innerHTML = `❌ <span class="down">${domain}</span> is <strong>DOWN</strong>`;
+        });
+    });
+  </script>
+</body>
+</html>
