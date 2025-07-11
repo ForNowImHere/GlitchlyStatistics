@@ -2,26 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>📡 one-learning-jaybird.ngrok-free.app Status Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>📡 Live NGROK + Site Status</title>
   <style>
     body {
       background: #121212;
       color: #eee;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 1rem;
+      max-width: 700px;
+      margin: 3rem auto;
+      padding: 1rem 2rem;
+      line-height: 1.4;
     }
     h1 {
-      color: #0ff;
       text-align: center;
-      margin-bottom: 1rem;
+      color: #0ff;
+      margin-bottom: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
     }
     #status {
       font-size: 1.8rem;
       text-align: center;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
+      font-weight: 700;
     }
     .up {
       color: #0f0;
@@ -32,155 +35,77 @@
     ul {
       list-style: none;
       padding-left: 0;
-      margin-bottom: 2rem;
-      max-height: 300px;
-      overflow-y: auto;
       border: 1px solid #333;
       border-radius: 8px;
-      padding: 1rem;
       background: #222;
+      max-height: 350px;
+      overflow-y: auto;
+      box-shadow: 0 0 10px #0ff44a44;
     }
     li {
-      padding: 0.3rem 0;
-      font-weight: 600;
+      padding: 0.6rem 1rem;
       border-bottom: 1px solid #333;
+      font-weight: 600;
+      font-size: 1rem;
     }
     li:last-child {
       border-bottom: none;
     }
-    canvas {
-      background: #222;
-      border-radius: 8px;
-      display: block;
-      margin: 0 auto 2rem auto;
-      max-width: 100%;
-      height: 250px;
+    li.up {
+      color: #0f0;
     }
-    #lastChecked {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #888;
-      margin-bottom: 2rem;
+    li.down {
+      color: #f44;
     }
   </style>
 </head>
 <body>
-  <h1>📡 one-learning-jaybird.ngrok-free.app Status</h1>
+  <h1>📡 NGROK + Site Status Dashboard</h1>
   <div id="status">Loading status…</div>
 
   <h2>🧩 Routes</h2>
   <ul id="routes"></ul>
 
-  <h2>📊 Downtime History</h2>
-  <canvas id="downtimeChart"></canvas>
-  <div id="lastChecked">Last checked: --</div>
-
   <script>
-    const statusEl = document.getElementById('status');
-    const routesEl = document.getElementById('routes');
-    const lastCheckedEl = document.getElementById('lastChecked');
-    let downtimeChart;
-
-    async function fetchJSON(url) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response not ok');
-        return await response.json();
-      } catch (e) {
-        console.error(`Failed to fetch ${url}:`, e);
-        return null;
-      }
-    }
-
-    function updateStatusUI(statusData) {
-      if (!statusData || !statusData.currentStatus) {
-        statusEl.textContent = "⚠️ Unable to fetch status";
-        statusEl.className = "down";
-        return;
-      }
-
-      switch (statusData.currentStatus) {
-        case "UP":
-          statusEl.textContent = "✅ Site is UP";
-          statusEl.className = "up";
-          break;
-        case "DOWN":
-          statusEl.textContent = "⚠️ Site is DOWN";
-          statusEl.className = "down";
-          break;
-        default:
-          statusEl.textContent = "❓ Unknown status";
-          statusEl.className = "";
-      }
-
-      lastCheckedEl.textContent = `Last checked: ${new Date(statusData.checked).toLocaleString()}`;
-
-      routesEl.innerHTML = "";
-      statusData.routes.forEach(route => {
-        const li = document.createElement('li');
-        if (route.status === 200) {
-          li.textContent = `✅ ${route.path} is UP`;
-          li.className = "up";
+    fetch('status.json')
+      .then(res => res.json())
+      .then(data => {
+        const live = document.getElementById('status');
+        if (data.currentStatus === "UP") {
+          live.textContent = "✅ NGROK + SITE UP";
+          live.className = "up";
+        } else if (data.currentStatus === "DOWN") {
+          live.textContent = "⚠️ SITE DOWN (but ngrok alive)";
+          live.className = "down";
         } else {
-          li.textContent = `❌ ${route.path} is DOWN (status: ${route.status})`;
-          li.className = "down";
+          live.textContent = "❌ NGROK OFFLINE";
+          live.className = "down";
         }
-        routesEl.appendChild(li);
-      });
-    }
 
-    function updateDowntimeChart(data) {
-      if (!data || !data.history || data.history.length === 0) return;
-
-      const labels = data.history.map(entry => new Date(entry.time).toLocaleString());
-      const values = data.history.map(entry => entry.status === "UP" ? 1 : 0);
-
-      if (downtimeChart) downtimeChart.destroy();
-
-      const ctx = document.getElementById('downtimeChart').getContext('2d');
-      downtimeChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Uptime History',
-            data: values,
-            fill: true,
-            borderColor: '#0ff',
-            backgroundColor: 'rgba(0, 255, 255, 0.3)',
-            tension: 0.3,
-            pointRadius: 4,
-            pointHoverRadius: 7,
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              min: 0,
-              max: 1,
-              ticks: {
-                stepSize: 1,
-                callback: val => val === 1 ? 'UP' : 'DOWN'
-              }
-            }
-          },
-          plugins: {
-            legend: { display: false }
+        // Replace route list
+        const routeList = document.getElementById('routes');
+        routeList.innerHTML = '';
+        data.routes.forEach(r => {
+          const li = document.createElement('li');
+          if (r.status === 200) {
+            li.innerHTML = `✅ ${r.path} is UP`;
+            li.className = 'up';
+          } else if (r.status === "NGROK_OFFLINE") {
+            li.innerHTML = `❌ ${r.path} — NGROK OFFLINE`;
+            li.className = 'down';
+          } else {
+            li.innerHTML = `❌ ${r.path} — ${r.status}`;
+            li.className = 'down';
           }
-        }
+          routeList.appendChild(li);
+        });
+      })
+      .catch(err => {
+        const live = document.getElementById('status');
+        live.textContent = "❌ Failed to load status.json";
+        live.className = "down";
+        console.error("Fetch error:", err);
       });
-    }
-
-    async function refreshDashboard() {
-      const statusData = await fetchJSON("status.json");
-      updateStatusUI(statusData);
-
-      const downtimeData = await fetchJSON("downtime-log.json");
-      updateDowntimeChart(downtimeData);
-    }
-
-    refreshDashboard();
-    setInterval(refreshDashboard, 15000); // update every 15 seconds
   </script>
 </body>
 </html>
