@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>📡 Live NGROK + Site Status</title>
+  <title>📡 Live NGROK + Site Status + Graph</title>
   <style>
     body {
       background: #121212;
@@ -23,7 +23,7 @@
     #status {
       font-size: 1.8rem;
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       font-weight: 700;
     }
     .up {
@@ -41,6 +41,7 @@
       max-height: 350px;
       overflow-y: auto;
       box-shadow: 0 0 10px #0ff44a44;
+      margin-top: 2rem;
     }
     li {
       padding: 0.6rem 1rem;
@@ -57,55 +58,173 @@
     li.down {
       color: #f44;
     }
+    #chart-container {
+      background: #222;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 0 15px #0ff44a88;
+      margin-bottom: 2rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: 200px !important;
+    }
   </style>
 </head>
 <body>
   <h1>📡 NGROK + Site Status Dashboard</h1>
   <div id="status">Loading status…</div>
 
+  <div id="chart-container">
+    <canvas id="statusChart"></canvas>
+  </div>
+
   <h2>🧩 Routes</h2>
   <ul id="routes"></ul>
 
-  <script>
-    fetch('status.json')
-      .then(res => res.json())
-      .then(data => {
-        const live = document.getElementById('status');
-        if (data.currentStatus === "UP") {
-          live.textContent = "✅ NGROK + SITE UP";
-          live.className = "up";
-        } else if (data.currentStatus === "DOWN") {
-          live.textContent = "⚠️ SITE DOWN (but ngrok alive)";
-          live.className = "down";
-        } else {
-          live.textContent = "❌ NGROK OFFLINE";
-          live.className = "down";
-        }
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        // Replace route list
-        const routeList = document.getElementById('routes');
-        routeList.innerHTML = '';
-        data.routes.forEach(r => {
-          const li = document.createElement('li');
-          if (r.status === 200) {
-            li.innerHTML = `✅ ${r.path} is UP`;
-            li.className = 'up';
-          } else if (r.status === "NGROK_OFFLINE") {
-            li.innerHTML = `❌ ${r.path} — NGROK OFFLINE`;
-            li.className = 'down';
-          } else {
-            li.innerHTML = `❌ ${r.path} — ${r.status}`;
-            li.className = 'down';
+  <script>
+    // Store history in memory
+    const historyData = {
+      labels: [],  // timestamps
+      upCounts: [] // number of routes UP at that time
+    };
+
+    // Setup Chart.js
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: historyData.labels,
+        datasets: [{
+          label: 'Routes UP',
+          data: historyData.upCounts,
+          fill: true,
+          backgroundColor: 'rgba(0, 255, 255, 0.2)',
+          borderColor: '#0ff',
+          borderWidth: 2,
+          tension: 0.3, // smooth curves
+          pointRadius: 3,
+          pointBackgroundColor: '#0ff',
+          pointHoverRadius: 5,
+          cubicInterpolationMode: 'monotone'
+        }]
+      },
+      options: {
+        animation: {
+          duration: 500
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 30, // max routes, adjust as needed
+            ticks: {
+              color: '#0ff'
+            },
+            grid: {
+              color: '#044'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#0ff',
+              maxRotation: 45,
+              minRotation: 45,
+              maxTicksLimit: 10,
+              autoSkip: true,
+              callback: function(value) {
+                // Show only HH:MM:SS
+                const label = this.getLabelForValue(value);
+                return label ? label.split('T')[1].split('.')[0] : '';
+              }
+            },
+            grid: {
+              color: '#044'
+            }
           }
-          routeList.appendChild(li);
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#0ff'
+            }
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: '#000',
+            borderColor: '#0ff',
+            borderWidth: 1,
+            titleColor: '#0ff',
+            bodyColor: '#0ff',
+            mode: 'nearest',
+            intersect: false
+          }
+        }
+      }
+    });
+
+    function updateDashboard() {
+      fetch('status.json')
+        .then(res => res.json())
+        .then(data => {
+          const live = document.getElementById('status');
+          if (data.currentStatus === "UP") {
+            live.textContent = "✅ NGROK + SITE UP";
+            live.className = "up";
+          } else if (data.currentStatus === "DOWN") {
+            live.textContent = "⚠️ SITE DOWN (but ngrok alive)";
+            live.className = "down";
+          } else {
+            live.textContent = "❌ NGROK OFFLINE";
+            live.className = "down";
+          }
+
+          // Route list
+          const routeList = document.getElementById('routes');
+          routeList.innerHTML = '';
+          let upCount = 0;
+          data.routes.forEach(r => {
+            const li = document.createElement('li');
+            if (r.status === 200) {
+              li.innerHTML = `✅ ${r.path} is UP`;
+              li.className = 'up';
+              upCount++;
+            } else if (r.status === "NGROK_OFFLINE") {
+              li.innerHTML = `❌ ${r.path} — NGROK OFFLINE`;
+              li.className = 'down';
+            } else {
+              li.innerHTML = `❌ ${r.path} — ${r.status}`;
+              li.className = 'down';
+            }
+            routeList.appendChild(li);
+          });
+
+          // Update history data for graph
+          const timestamp = data.checked || new Date().toISOString();
+          historyData.labels.push(timestamp);
+          historyData.upCounts.push(upCount);
+
+          // Keep history length reasonable (max 30 points)
+          if(historyData.labels.length > 30){
+            historyData.labels.shift();
+            historyData.upCounts.shift();
+          }
+
+          statusChart.update();
+        })
+        .catch(err => {
+          const live = document.getElementById('status');
+          live.textContent = "❌ Failed to load status.json";
+          live.className = "down";
+          console.error("Fetch error:", err);
         });
-      })
-      .catch(err => {
-        const live = document.getElementById('status');
-        live.textContent = "❌ Failed to load status.json";
-        live.className = "down";
-        console.error("Fetch error:", err);
-      });
+    }
+
+    // Initial load + every 30 seconds
+    updateDashboard();
+    setInterval(updateDashboard, 30000);
   </script>
 </body>
 </html>
