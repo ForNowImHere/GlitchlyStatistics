@@ -1,6 +1,6 @@
 {
-  "checked": "2025-07-12T18:41:54.447828",
-  "currentStatus": "DOWN",
+  "checked": "2025-07-12T18:43:25.838410",
+  "currentStatus": "UP",
   "routes": [
     {
       "path": "/anotheglitch",
@@ -100,7 +100,7 @@
     },
     {
       "path": "/monstertracker",
-      "status": "DOWN"
+      "status": 200
     },
     {
       "path": "/vida",
