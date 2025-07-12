@@ -1,6 +1,6 @@
 {
-  "checked": "2025-07-12T18:43:25.838410",
-  "currentStatus": "UP",
+  "checked": "2025-07-12T18:44:59.608987",
+  "currentStatus": "DOWN",
   "routes": [
     {
       "path": "/anotheglitch",
@@ -60,7 +60,7 @@
     },
     {
       "path": "/CookiesBatter",
-      "status": 200
+      "status": "DOWN"
     },
     {
       "path": "/glitchlu",
