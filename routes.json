@@ -1,32 +1,5 @@
 {
   "routes": [
-    "/",
-    "/CookiesBatter",
-    "/ERROR404",
-    "/KeenNetCreates",
-    "/MyloveforCOOKIES",
-    "/PackageGlitchly1",
-    "/Temp2",
-    "/Temp3",
-    "/aboutme",
-    "/anl",
-    "/anotheglitch",
-    "/anotheglitch2",
-    "/attak",
-    "/battlethes",
-    "/cookies",
-    "/draw",
-    "/glitchlu",
-    "/glitchly",
-    "/imggrid",
-    "/login",
-    "/monstertracker",
-    "/name",
-    "/sequrify",
-    "/serverrunner",
-    "/signup",
-    "/test",
-    "/toolkit.html",
-    "/vida"
+    "one-learning-jaybird.ngrok-free.app"
   ]
 }
