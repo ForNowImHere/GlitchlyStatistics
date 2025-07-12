@@ -1,118 +1,118 @@
 {
-  "checked": "2025-07-12T18:44:59.608987",
+  "checked": "2025-07-12T18:46:24.527999",
   "currentStatus": "DOWN",
   "routes": [
     {
       "path": "/anotheglitch",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/battlethes",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/anl",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/attak",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/cookies",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/sequrify",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/glitchly",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/test",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/PackageGlitchly1",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/login",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/KeenNetCreates",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/signup",
-      "status": 200
-    },
-    {
-      "path": "/imggrid",
-      "status": 200
-    },
-    {
-      "path": "/CookiesBatter",
       "status": "DOWN"
     },
     {
+      "path": "/imggrid",
+      "status": 404
+    },
+    {
+      "path": "/CookiesBatter",
+      "status": 404
+    },
+    {
       "path": "/glitchlu",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/MyloveforCOOKIES",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/anotheglitch2",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/serverrunner",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/toolkit.html",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/Temp2",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/Temp3",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/draw",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/aboutme",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/monstertracker",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/vida",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/ERROR404",
-      "status": 200
+      "status": 404
     },
     {
       "path": "/name",
-      "status": 200
+      "status": 404
     }
   ]
 }
