@@ -1,10 +1,10 @@
 {
-  "checked": "2025-07-12T18:38:49.884582",
+  "checked": "2025-07-12T18:39:24.059274",
   "currentStatus": "DOWN",
   "routes": [
     {
       "path": "/",
-      "status": "DOWN"
+      "status": 400
     }
   ]
 }
